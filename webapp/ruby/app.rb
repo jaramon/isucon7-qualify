@@ -118,24 +118,24 @@ class App < Sinatra::Base
 
     channel_id = params[:channel_id].to_i
     last_message_id = params[:last_message_id].to_i
-    statement = db.prepare('SELECT * FROM message m INNER JOIN user u ON u.id = m.user_id WHERE m.id > ? AND m.channel_id = ? ORDER BY m.id DESC LIMIT 100')
+    statement = db.prepare('SELECT m.id m_id, m.created_at m_created_at, m.content m_content, u.name u_name, u.display_name u_display_name, u.avatar_icon u_avatar_icon FROM message m INNER JOIN user u ON u.id = m.user_id WHERE m.id > ? AND m.channel_id = ? ORDER BY m.id DESC LIMIT 100')
     rows = statement.execute(last_message_id, channel_id).to_a
     response = []
     rows.each do |row|
       r = {}
-      r['id'] = row['id']
+      r['id'] = row['m_id']
       r['user'] = {
-        "name" => row['name'],
-        "display_name" => row['display_name'],
-        "avatar_icon" => row['avatar_icon'],
+        "name" => row['u_name'],
+        "display_name" => row['u_display_name'],
+        "avatar_icon" => row['u_avatar_icon'],
       }
-      r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
-      r['content'] = row['content']
+      r['date'] = row['m_created_at'].strftime("%Y/%m/%d %H:%M:%S")
+      r['content'] = row['m_content']
       response << r
     end
     response.reverse!
 
-    max_message_id = rows.empty? ? 0 : rows.map { |row| row['id'] }.max
+    max_message_id = rows.empty? ? 0 : rows.map { |row| row['m_id'] }.max
     statement = db.prepare([
       'INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at) ',
       'VALUES (?, ?, ?, NOW(), NOW()) ',
