@@ -153,6 +153,8 @@ class App < Sinatra::Base
       return 403
     end
 
+    sleep 5.0
+
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
