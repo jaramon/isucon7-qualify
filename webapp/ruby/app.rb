@@ -132,7 +132,6 @@ class App < Sinatra::Base
       r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
       r['content'] = row['content']
       response << r
-      statement.close
     end
     response.reverse!
 
